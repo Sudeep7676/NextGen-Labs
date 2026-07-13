@@ -74,6 +74,8 @@ app:
     enabled: ${EMAIL_ENABLED:true}
     from: ${EMAIL_FROM:NextGen Labs <nextgenlabs.edu@gmail.com>}
     company-inbox: ${EMAIL_COMPANY_INBOX:nextgenlabs.edu@gmail.com}
+    # When set, email is sent via Resend's HTTP API (works on hosts that block SMTP).
+    resend-api-key: ${RESEND_API_KEY:}
   turnstile:
     enabled: ${TURNSTILE_ENABLED:false}
     secret-key: ${TURNSTILE_SECRET:}

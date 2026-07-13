@@ -84,12 +84,15 @@ public class AppProperties {
         private boolean enabled = true;
         private String from;
         private String companyInbox;
+        private String resendApiKey;   // when set, email is sent via Resend HTTP API
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
         public String getFrom() { return from; }
         public void setFrom(String from) { this.from = from; }
         public String getCompanyInbox() { return companyInbox; }
         public void setCompanyInbox(String companyInbox) { this.companyInbox = companyInbox; }
+        public String getResendApiKey() { return resendApiKey; }
+        public void setResendApiKey(String resendApiKey) { this.resendApiKey = resendApiKey; }
     }
 
     public static class Turnstile {
