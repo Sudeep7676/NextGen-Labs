@@ -10,12 +10,15 @@ import ai.nextgenlabs.util.InputSanitizer;
 import ai.nextgenlabs.web.RateLimitExceededException;
 import ai.nextgenlabs.web.SpamRejectedException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,8 +94,25 @@ public class ContactService {
     @Transactional(readOnly = true)
     public PageResponse<ContactResponse> list(String search, InquiryStatus status,
                                               InquiryType type, Pageable pageable) {
-        String normalizedSearch = StringUtils.hasText(search) ? search.trim() : null;
-        Page<ContactInquiry> page = repository.search(normalizedSearch, status, type, pageable);
+        Specification<ContactInquiry> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.hasText(search)) {
+                String like = "%" + search.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("fullName")), like),
+                        cb.like(cb.lower(root.get("email")), like),
+                        cb.like(cb.lower(cb.coalesce(root.get("companyName"), "")), like)
+                ));
+            }
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            if (type != null) {
+                predicates.add(cb.equal(root.get("inquiryType"), type));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Page<ContactInquiry> page = repository.findAll(spec, pageable);
         return PageResponse.of(page, ContactResponse::from);
     }
 
