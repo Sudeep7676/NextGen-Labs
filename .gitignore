@@ -1,0 +1,25 @@
+# --- Frontend ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.env.local
+.env.*.local
+
+# --- Backend ---
+backend/target/
+backend/*.log
+backend/build*.log
+backend/run.log
+backend/supabase.log
+*.log
+
+# Local secret config (contains DB password) — never commit
+backend/src/main/resources/application-supabase.yml
+
+# --- Misc ---
+.DS_Store
+.idea/
+.vscode/
+*.iml

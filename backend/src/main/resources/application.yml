@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: nextgen-contact-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/nextgenlabs}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      # Supabase pooler tiers cap connections — keep the pool modest.
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+      minimum-idle: ${DB_POOL_MIN:1}
+      connection-timeout: 30000
+      max-lifetime: 1800000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:nextgenlabs.edu@gmail.com}
+    # Set via MAIL_PASSWORD env var (Gmail App Password). Never commit the value.
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        transport:
+          protocol: smtp
+    default-encoding: UTF-8
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: always
+    include-binding-errors: always
+  forward-headers-strategy: framework
+
+app:
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:4173}
+  jwt:
+    # Base64-encoded 256-bit secret. Override in production via env var.
+    secret: ${JWT_SECRET:Y2hhbmdlLW1lLXRoaXMtaXMtYS1kZXYtb25seS1zZWNyZXQtMzJieXRlcyE=}
+    access-token-ttl-minutes: ${JWT_TTL_MINUTES:120}
+    issuer: nextgen-labs
+  email:
+    enabled: ${EMAIL_ENABLED:true}
+    from: ${EMAIL_FROM:NextGen Labs <nextgenlabs.edu@gmail.com>}
+    company-inbox: ${EMAIL_COMPANY_INBOX:nextgenlabs.edu@gmail.com}
+  turnstile:
+    enabled: ${TURNSTILE_ENABLED:false}
+    secret-key: ${TURNSTILE_SECRET:}
+    verify-url: https://challenges.cloudflare.com/turnstile/v0/siteverify
+  rate-limit:
+    contact-per-hour: ${CONTACT_RATE_LIMIT:5}
+  bootstrap:
+    super-admin-email: ${SUPER_ADMIN_EMAIL:admin@nextgenlabs.ai}
+    super-admin-password: ${SUPER_ADMIN_PASSWORD:Tr0ub4dour$Guitar#2026}
+
+logging:
+  level:
+    ai.nextgenlabs: INFO
