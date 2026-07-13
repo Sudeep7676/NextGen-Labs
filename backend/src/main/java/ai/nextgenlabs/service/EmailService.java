@@ -54,8 +54,23 @@ public class EmailService {
         return props.getEmail().isEnabled();
     }
 
+    private boolean useBrevo() {
+        return StringUtils.hasText(props.getEmail().getBrevoApiKey());
+    }
+
     private boolean useResend() {
         return StringUtils.hasText(props.getEmail().getResendApiKey());
+    }
+
+    /** Splits an "Name <email>" address into [name, email]. */
+    private String[] parseFrom() {
+        String from = props.getEmail().getFrom();
+        if (from != null && from.contains("<") && from.contains(">")) {
+            String name = from.substring(0, from.indexOf('<')).trim();
+            String email = from.substring(from.indexOf('<') + 1, from.indexOf('>')).trim();
+            return new String[]{name.isEmpty() ? "NextGen Labs" : name, email};
+        }
+        return new String[]{"NextGen Labs", from == null ? "" : from.trim()};
     }
 
     /* ---------------------- Acknowledgment (on submit) --------------------- */
@@ -169,12 +184,43 @@ public class EmailService {
         return emailRepo.save(record);
     }
 
-    /** Sends one email via Resend (if configured) or SMTP. Returns true on success. */
+    /** Sends one email via Brevo → Resend → SMTP (first configured wins). */
     private boolean deliver(String to, String subject, String html, String replyTo) {
+        if (useBrevo()) {
+            return sendViaBrevo(to, subject, html, replyTo);
+        }
         if (useResend()) {
             return sendViaResend(to, subject, html, replyTo);
         }
         return sendViaSmtp(to, subject, html, replyTo);
+    }
+
+    private boolean sendViaBrevo(String to, String subject, String html, String replyTo) {
+        try {
+            String[] from = parseFrom();
+            var payload = new java.util.HashMap<String, Object>();
+            payload.put("sender", Map.of("name", from[0], "email", from[1]));
+            payload.put("to", List.of(Map.of("email", to)));
+            payload.put("subject", subject);
+            payload.put("htmlContent", html);
+            if (StringUtils.hasText(replyTo)) {
+                payload.put("replyTo", Map.of("email", replyTo));
+            }
+            Map<?, ?> res = http.post()
+                    .uri("https://api.brevo.com/v3/smtp/email")
+                    .header("api-key", props.getEmail().getBrevoApiKey())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(payload)
+                    .retrieve()
+                    .body(Map.class);
+            boolean ok = res != null && res.get("messageId") != null;
+            if (ok) log.info("Brevo email '{}' sent to {}", subject, to);
+            else log.warn("Brevo email '{}' to {} returned no messageId: {}", subject, to, res);
+            return ok;
+        } catch (Exception ex) {
+            log.error("Brevo send to {} failed: {}", to, ex.getMessage());
+            return false;
+        }
     }
 
     private boolean sendViaResend(String to, String subject, String html, String replyTo) {

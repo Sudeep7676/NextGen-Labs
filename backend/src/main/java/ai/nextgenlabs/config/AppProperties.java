@@ -84,7 +84,8 @@ public class AppProperties {
         private boolean enabled = true;
         private String from;
         private String companyInbox;
-        private String resendApiKey;   // when set, email is sent via Resend HTTP API
+        private String resendApiKey;   // Resend HTTP API (requires verified domain)
+        private String brevoApiKey;    // Brevo HTTP API (single verified sender, no domain needed)
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
         public String getFrom() { return from; }
@@ -93,6 +94,8 @@ public class AppProperties {
         public void setCompanyInbox(String companyInbox) { this.companyInbox = companyInbox; }
         public String getResendApiKey() { return resendApiKey; }
         public void setResendApiKey(String resendApiKey) { this.resendApiKey = resendApiKey; }
+        public String getBrevoApiKey() { return brevoApiKey; }
+        public void setBrevoApiKey(String brevoApiKey) { this.brevoApiKey = brevoApiKey; }
     }
 
     public static class Turnstile {

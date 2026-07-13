@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "@/store/theme";
 import { ContactCenter } from "@/components/admin/ContactCenter";
 import { FirstVisitIntro, markIntroSeen } from "@/components/intro/FirstVisitIntro";
 import { Header } from "@/components/layout/Header";
@@ -16,7 +15,6 @@ import { MissionVision } from "@/components/sections/MissionVision";
 import { Contact } from "@/components/sections/Contact";
 
 export default function App() {
-  const theme = useTheme((s) => s.theme);
   const [route, setRoute] = useState(() => window.location.hash);
   // Show the cinematic intro on every visit (never on the admin route).
   const [showIntro, setShowIntro] = useState(
@@ -28,10 +26,11 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Light mode only.
     const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
-    root.style.colorScheme = theme;
-  }, [theme]);
+    root.classList.remove("dark");
+    root.style.colorScheme = "light";
+  }, []);
 
   useEffect(() => {
     const onHash = () => setRoute(window.location.hash);

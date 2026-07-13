@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Sun, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/store/theme";
 import { NAV_LINKS } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
 
 export function Header() {
-  const { theme, toggle } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -49,24 +47,6 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={toggle}
-            aria-label="Toggle theme"
-            className="grid h-10 w-10 place-items-center rounded-full text-current/70 transition-colors hover:bg-black/5 hover:text-current dark:hover:bg-white/5"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={theme}
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.25 }}
-              >
-                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-              </motion.span>
-            </AnimatePresence>
-          </button>
-
           <Button
             variant="primary"
             size="sm"
