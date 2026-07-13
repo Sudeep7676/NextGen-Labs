@@ -34,6 +34,10 @@ spring:
       mail:
         smtp:
           auth: true
+          # Fail fast instead of hanging if SMTP is blocked/slow.
+          connectiontimeout: 8000
+          timeout: 8000
+          writetimeout: 8000
           starttls:
             enable: true
             required: true
@@ -47,6 +51,16 @@ server:
     include-message: always
     include-binding-errors: always
   forward-headers-strategy: framework
+
+# Health checks must NOT probe SMTP (it can hang and fail the deploy).
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    mail:
+      enabled: false
 
 app:
   cors:
